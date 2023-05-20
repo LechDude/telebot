@@ -32,7 +32,7 @@ def need_values(row, date_start, date_end):
 
 def new_value(cell,value):
     global sh
-    worksheet = sh.get_worksheet('Отчёт')
+    worksheet = sh.worksheet("Отчёт")
     worksheet.update(cell,value)
 
 
@@ -55,10 +55,9 @@ def start_handler(message):
 def echo_message(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton('Редактировать значения')
-    btn2 = types.KeyboardButton('Редактировать даты')
-    btn3 = types.KeyboardButton('Сформировать отчёт')
+    btn2 = types.KeyboardButton('Сформировать отчёт')
 
-    markup.add(btn1,btn2,btn3)
+    markup.add(btn1,btn2)
     bot.send_message(message.chat.id,'Что требуется сделать?', reply_markup=markup)
     bot.register_next_step_handler(message, first_choose)
 
@@ -74,7 +73,7 @@ def first_choose(message):
         bot.send_message(message.chat.id, 'Значение?',reply_markup=markup)
         bot.register_next_step_handler(message, edit_values)
     elif message.text == 'Сформировать отчёт':
-        bot.send_message(message.chat.id, 'Укажите даты за которые требуется сформировать отчёт')
+        bot.send_message(message.chat.id, 'Укажите даты за которые требуется сформировать отчёт полностью, через дефис, без пробелов')
         bot.register_next_step_handler(message, new_res)   
 
 def edit_values(message):
@@ -90,7 +89,6 @@ def edit_values(message):
             file_data = json.load(file)
             bot.send_message(message.chat.id,f'Текущие значения: {file_data[chat_id]}')
 
-
 #Удаление последнего значения
 def delete_value(message):
     chat_id = f"{message.chat.id}"
@@ -104,18 +102,17 @@ def delete_value(message):
 
 
 #Указываем даты
-def new_date(message):
-    global dateList
-    dateList = message.text.split('-')
-    bot.send_message(message.chat.id, f'Даты приняты. Список дат:{dateList}')
-    bot.register_next_step_handler(message, echo_message)   
+# def new_date(message):
+#     dateList = message.text.split('-')
+#     bot.send_message(message.chat.id, 'Даты приняты. Формирую отчёт')
+#     bot.register_next_step_handler(message, echo_message)   
 
 
 #Формирование отчёта
 def new_res(message):
-    bot.send_message(message.chat.id,'Мы попали')
+    print(message.text)
+    dateList = message.text.split('-')
     global valList
-    global dateList
     global worksheet
     global sh
     #Авторизация
@@ -123,8 +120,7 @@ def new_res(message):
 
     #Открываем таблицу, работаем с листом
     sh = gc.open("131-форма")
-    bot.send_message(message.chat.id,'')
-    worksheet = sh.get_worksheet(0)
+    worksheet = sh.worksheet("Май")
 
     #Определяем переменные
 
@@ -154,6 +150,10 @@ def new_res(message):
 
     #Всего прошло
     sum = 0
+    chat_id = f"{message.chat.id}"
+    with open('nubmers.json','r+') as file:
+        file_data = json.load(file)
+        valList = file_data[chat_id]
     for i in valList:
         sum += int(i)
 
@@ -183,7 +183,7 @@ def new_res(message):
     new_value(healthThreeACell,f'{healthThreeA}')
     new_value(healthThreeBCell,f'{healthThreeB}')
 
-    new_value(payCell,f'{sum}')
+    new_value(payCell,f'{healthOne+healthTwo+healthThreeA+healthThreeB}')
     new_value(secondStageCell,f'{secondStage}')
     new_value(secondStageFCell,f'{secondStage}')        
 
