@@ -1,16 +1,24 @@
-f = open('nubmers.txt','w')
-l = ['10','11','12']
+import json
 
-for index in l:
-    f.write(index + '\n')
+def save_to_file(file_name,chat_id,value):
+    with open(file_name,'r+') as file:
+        file_data = json.load(file)
+        #Проверяем наличие пользователя в JSON
+        if chat_id in file:
+            file_data[chat_id].append(int(value)) # Если есть - обновляем лист
+        else:
+            file_data[chat_id] = int(value) # Если нет - добавляем пользователя и первое значение
+    with open(file_name,'w') as file:
+        json.dump(file_data,file)
 
-f.close()
-
-f = open('nubmers.txt','r')
-
-l = [line.strip() for line in f]
-
-l = [int(i) for i in l]
-print(l)
-
-f.close()
+with open('nubmers.json','r+') as file:
+    file_data = json.load(file)
+    chat_id = "249005028"
+    value = '78'
+    #Проверяем наличие пользователя в JSON
+    if chat_id in file_data:
+         file_data[chat_id].append(int(value)) # Если есть - обновляем лист
+    else:
+         file_data[chat_id] = int(value) # Если нет - добавляем пользователя и первое значение
+    with open('nubmers.json','w') as file:
+        json.dump(file_data,file)
