@@ -3,7 +3,7 @@ from telebot import types
 import gspread
 import datetime
 import json
-
+#Запись в JSON
 def save_to_file(message):
     value = int(message.text)
     chat_id = f"{message.chat.id}"
@@ -79,27 +79,29 @@ def first_choose(message):
 
 def edit_values(message):
     if message.text == 'Добавить значение':
-        print(message.chat.id)
         bot.send_message(message.chat.id,'Введи значения по одному')
         bot.register_next_step_handler(message, save_to_file)
     elif message.text == 'Убрать значение':
-        pass
+        bot.send_message(message.chat.id,'Последнее значение удалено')
+        delete_value(message)
     elif message.text =='Показать текущие значения':
-        f = open('nubmers.txt','r')
-        l = [line.strip() for line in f]
-        bot.send_message(message.chat.id,f'Текущие значения: {l}') 
+        with open('nubmers.json','r+') as file:
+            chat_id = f'{message.chat.id}'
+            file_data = json.load(file)
+            bot.send_message(message.chat.id,f'Текущие значения: {file_data[chat_id]}')
 
 
-#Добавляем значения в лист
-# def new_lists(message):
-#     global valList
-#     value = message.text
-#     f = open('nubmers.txt','a')
-#     f.write(value + '\n')
-#     f.close
+#Удаление последнего значения
+def delete_value(message):
+    chat_id = f"{message.chat.id}"
+    with open('nubmers.json','r+') as file:
+        file_data = json.load(file)
+        #Проверяем наличие пользователя в JSON
+        file_data[chat_id].pop()
+    bot.send_message(message.chat.id,f'Текущие значения: {file_data[chat_id]}')
+    with open('nubmers.json','w') as file:
+        json.dump(file_data,file)
 
-#     bot.send_message(message.chat.id, f'Ваше значение: {value}',reply_markup=markup)
-#     bot.register_next_step_handler(message, echo_message)   
 
 #Указываем даты
 def new_date(message):
@@ -107,6 +109,7 @@ def new_date(message):
     dateList = message.text.split('-')
     bot.send_message(message.chat.id, f'Даты приняты. Список дат:{dateList}')
     bot.register_next_step_handler(message, echo_message)   
+
 
 #Формирование отчёта
 def new_res(message):
